@@ -3,11 +3,12 @@
 #include <vector>
 
 struct neighbor {
-    int nid;
-    double weight;
+  int    id;
+  double weight;
 };
 
 struct node {
-    int id;
-    vector<neighbor> negbr;
+  // mapのときのid(key)と一致させるようにする
+  int                   id;
+  std::vector<neighbor> neighbor;
 };
