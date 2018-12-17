@@ -24,37 +24,32 @@ int main() {
     for (int i = 0; i < a.size(); i++) {
       if (node_vector.size() != 0) {
         // 2番目以降の要素の追加
-        for (int j = 0; j < node_vector.size(); j++) {
-          if (a.at(i) == node_vector.at(j).id) {
-            // a(i)がノード配列の既存idと一致した場合
-            for (int k = 0; k < a.size(); k++) {
-              if (k == i) continue;
-              for (int l = 0; l < node_vector.at(j).neighbor.size(); l++) {
-                if (a.at(k) == node_vector.at(j).neighbor.at(l).id) {
-                  // a(k)がneighborの既存idと一致した場合
-                  node_vector.at(j).neighbor.at(l).weight++;
-                  break;
-                } else if (l == node_vector.at(j).neighbor.size() - 1) {
-                  // a(k)がneighborに存在しないidの場合
-                  struct neighbor ng;
-                  ng.id     = a.at(k);
-                  ng.weight = 1;
-                  node_vector.at(j).neighbor.push_back(ng);
-                }
-              }
-            }
-          } else if (j == node_vector.size() - 1) {
-            // a(i)がノード配列に存在しないidだった場合
-            struct node     n;
-            struct neighbor ng;
-            n.id = a.at(i);
-            for (int k = 0; k < a.size(); k++) {
-              if (i == k) continue;
-              ng.id     = a.at(k);
+        if (node_check(a.at(i), node_vector) == -1) {
+          struct node n;
+          n.id = a.at(i);
+          struct neighbor ng;
+          for (int j = 0; j < a.size(); j++) {
+            if (j != i) {
+              ng.id     = a.at(j);
               ng.weight = 1;
               n.neighbor.push_back(ng);
             }
-            node_vector.push_back(n);
+          }
+          node_vector.push_back(n);
+        } else {
+          int j = node_check(a.at(i), node_vector);
+          for (int k = 0; k < a.size(); k++) {
+            if (k != i) {
+              int l = neighbor_check(a.at(k), node_vector.at(j));
+              if (l == -1) {
+                struct neighbor ng;
+                ng.id     = a.at(k);
+                ng.weight = 1;
+                node_vector.at(j).neighbor.push_back(ng);
+              } else {
+                node_vector.at(j).neighbor.at(l).weight++;
+              }
+            }
           }
         }
       } else if (node_vector.size() == 0) {
@@ -74,8 +69,6 @@ int main() {
   ifs.close();
 
   print_vector(node_vector);
-
-  cout << node_vector.at(1).neighbor.at(0).id << endl;
 
   return 0;
 }
