@@ -8,7 +8,10 @@
 using namespace std;
 
 int main() {
-  // csvファイルの読み込み
+  //////////////////////////
+  //  csvファイルの読み込み  //
+  //////////////////////////
+
   std::ifstream ifs("data.csv");
   ifs.is_open();
 
@@ -73,6 +76,36 @@ int main() {
   ifs.close();
 
   print_vector(node_vector);
+  cout << endl;
+
+  //////////////////////
+  //  スコア配列の生成  //
+  /////////////////////
+
+  double score[node_vector.size()];
+  double accum[node_vector.size()];
+
+  for (int i = 0; i < node_vector.size(); i++) {
+    score[i] = 100.0;
+    accum[i] = 0.0;
+  }
+
+  print_score(node_vector, score, accum);
+  cout << endl;
+
+  /////////////////////
+  //  edge行列の生成  //
+  ////////////////////
+
+  double edge[node_vector.size()][node_vector.size()];
+  for (int i = 0; i < node_vector.size(); i++) {
+    for (int j = 0; j < node_vector.size(); j++) {
+      edge[i][j] = 0;
+    }
+  }
+
+  generate_edge(node_vector, &edge[0][0]);
+  print_edge(node_vector, &edge[0][0]);
 
   return 0;
 }
