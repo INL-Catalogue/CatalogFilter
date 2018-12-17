@@ -25,6 +25,7 @@ int main() {
       if (node_vector.size() != 0) {
         // 2番目以降の要素の追加
         if (node_check(a.at(i), node_vector) == -1) {
+          // 新出のノードの場合
           struct node n;
           n.id = a.at(i);
           struct neighbor ng;
@@ -37,16 +38,19 @@ int main() {
           }
           node_vector.push_back(n);
         } else {
+          // 既存のノードの場合
           int j = node_check(a.at(i), node_vector);
           for (int k = 0; k < a.size(); k++) {
             if (k != i) {
               int l = neighbor_check(a.at(k), node_vector.at(j));
               if (l == -1) {
+                // 新出のneighborの場合
                 struct neighbor ng;
                 ng.id     = a.at(k);
                 ng.weight = 1;
                 node_vector.at(j).neighbor.push_back(ng);
               } else {
+                // 既存のneighborの場合
                 node_vector.at(j).neighbor.at(l).weight++;
               }
             }
