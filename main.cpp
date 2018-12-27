@@ -8,6 +8,7 @@
 #include "include/CatalogFilter.h"
 
 using namespace std;
+using namespace catalog;
 
 int main() {
   //////////////////////////
@@ -128,6 +129,12 @@ int main() {
     cout << endl;
   }
 
+  ///////////////
+  //  DBへ保存  //
+  ///////////////
+
+  Data_save(node_vector, score);
+
   return 0;
 }
 
@@ -246,4 +253,42 @@ bool diff(double score[], double accum[], int size) {
   for (int i = 0; i < size; i++)
     if (std::fabs(accum[i] - score[i]) > 0.00001) return false;
   return true;
+}
+
+int Data_save(std::vector<node> node_vector, double score[]) {
+  DBClient *db;
+  db = new DBClient();
+
+  if (db->connectDb((char *)&dbHost[0], (char *)&dbUser[0], (char *)&dbps[0],
+                    (char *)&dbName[0]) < 0) {
+    cerr << "DB CONNECT ERROR" << endl;
+    return -1;
+  } else {
+    cout << "Connect DB" << endl;
+  }
+
+  int    nRow;
+  string sql1 =
+      "CREATE TABLE IF NOT EXISTS score (id int NOT NULL, score double, "
+      "primary key(id));";
+  if ((nRow = db->sendQuery((char *)sql1.c_str())) < 0) {
+    cerr << "DB QUERY ERROR" << endl;
+    return -1;
+  }
+
+  string sql2 = "INSERT INTO score (id, score) VALUES ";
+  for (int i = 0; i < node_vector.size(); i++) {
+    sql2 += "( ";
+    sql2 += IntToString(node_vector.at(i).id) + ", ";
+    sql2 += IntToString(score[i]);
+    sql2 += ")";
+    if (i != node_vector.size() - 1) sql2 += ", ";
+  }
+
+  if ((nRow = db->sendQuery((char *)sql2.c_str())) < 0) {
+    cerr << "DB QUERY ERROR" << endl;
+    return -1;
+  }
+
+  return 0;
 }
