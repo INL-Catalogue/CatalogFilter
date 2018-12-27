@@ -1,3 +1,5 @@
+#include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -6,6 +8,7 @@
 #include "include/CatalogFilter.h"
 
 using namespace std;
+using namespace catalog;
 
 int main() {
   //////////////////////////
@@ -106,6 +109,186 @@ int main() {
 
   generate_edge(node_vector, &edge[0][0]);
   print_edge(node_vector, &edge[0][0]);
+
+  ///////////////
+  //  初期計算  //
+  ///////////////
+
+  int count = 1;
+
+  while (1) {
+    cout << "count " << count << endl;
+    Simplified_PageRank(score, &edge[0][0], accum, node_vector.size());
+    print_score(node_vector, score, accum);
+    if (diff(score, accum, node_vector.size())) {
+      accum_score(accum, score, node_vector.size());
+      break;
+    }
+    accum_score(accum, score, node_vector.size());
+    count++;
+    cout << endl;
+  }
+
+  ///////////////
+  //  DBへ保存  //
+  ///////////////
+
+  Data_save(node_vector, score);
+
+  return 0;
+}
+
+std::vector<string> split(std::string &input, char delimiter) {
+  std::istringstream  stream(input);
+  std::string         field;
+  std::vector<string> result;
+  while (std::getline(stream, field, delimiter)) {
+    result.push_back(field);
+  }
+  return result;
+}
+
+void print(struct node node) {
+  std::cout << "id = " << node.id << endl;
+  std::cout << "neighbor: ";
+  for (int i = 0; i < node.neighbor.size(); i++) {
+    if (i == node.neighbor.size() - 1)
+      std::cout << node.neighbor.at(i).id << endl;
+    else
+      std::cout << node.neighbor.at(i).id << ", ";
+  }
+  std::cout << "weight:   ";
+  for (int i = 0; i < node.neighbor.size(); i++) {
+    if (i == node.neighbor.size() - 1)
+      std::cout << node.neighbor.at(i).weight << endl;
+    else
+      std::cout << node.neighbor.at(i).weight << ", ";
+  }
+}
+
+void print_vector(std::vector<node> node_vector) {
+  for (int j = 0; j < node_vector.size(); j++) {
+    print(node_vector.at(j));
+  }
+}
+
+int node_check(int a, std::vector<node> node_vector) {
+  for (int i = 0; i < node_vector.size(); i++) {
+    if (a == node_vector.at(i).id) return i;
+  }
+  return -1;
+}
+
+int neighbor_check(int a, struct node node) {
+  for (int i = 0; i < node.neighbor.size(); i++) {
+    if (a == node.neighbor.at(i).id) return i;
+  }
+  return -1;
+}
+
+void print_score(std::vector<node> node_vector, double score[],
+                 double accum[]) {
+  cout << "  id  |";
+  for (int i = 0; i < node_vector.size(); i++) {
+    if (i == node_vector.size() - 1)
+      cout << "  " << node_vector.at(i).id << "  |" << endl;
+    else
+      cout << "  " << node_vector.at(i).id << "  |";
+  }
+  cout << "score |";
+  for (int i = 0; i < node_vector.size(); i++) {
+    if (i == node_vector.size() - 1)
+      cout << " " << score[i] << " |" << endl;
+    else
+      cout << " " << score[i] << " |";
+  }
+  cout << "accum |";
+  for (int i = 0; i < node_vector.size(); i++) {
+    if (i == node_vector.size() - 1)
+      cout << " " << accum[i] << " |" << endl;
+    else
+      cout << " " << accum[i] << " |";
+  }
+}
+
+void generate_edge(std::vector<node> node_vector, double *edge) {
+  for (int i = 0; i < node_vector.size(); i++) {
+    double element = 1.0 / (double)node_vector.at(i).neighbor.size();
+    for (int j = 0; j < node_vector.size(); j++) {
+      int k = neighbor_check(node_vector.at(j).id, node_vector.at(i));
+      if (k != -1) *(edge + i * node_vector.size() + j) = element;
+    }
+  }
+}
+
+void print_edge(std::vector<node> node_vector, double *edge) {
+  for (int i = 0; i < node_vector.size(); i++) {
+    cout << "| " << node_vector.at(i).id << " |";
+    for (int j = 0; j < node_vector.size(); j++) {
+      cout << " " << *(edge + i * node_vector.size() + j) << " ";
+    }
+    cout << endl;
+  }
+  cout << endl;
+}
+
+void Simplified_PageRank(double score[], double *edge, double accum[],
+                         int size) {
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
+      double e = *(edge + j * size + i);
+      accum[i] = accum[i] + score[j] * e;
+    }
+  }
+}
+
+void accum_score(double accum[], double score[], int size) {
+  for (int i = 0; i < size; i++) {
+    score[i] = accum[i];
+    accum[i] = 0;
+  }
+}
+
+bool diff(double score[], double accum[], int size) {
+  for (int i = 0; i < size; i++)
+    if (std::fabs(accum[i] - score[i]) > 0.00001) return false;
+  return true;
+}
+
+int Data_save(std::vector<node> node_vector, double score[]) {
+  DBClient *db;
+  db = new DBClient();
+
+  if (db->connectDb((char *)&dbHost[0], (char *)&dbUser[0], (char *)&dbps[0],
+                    (char *)&dbName[0]) < 0) {
+    cerr << "DB CONNECT ERROR" << endl;
+    return -1;
+  } else {
+    cout << "Connect DB" << endl;
+  }
+
+  int    nRow;
+  string sql1 =
+      "CREATE TABLE IF NOT EXISTS score (id int NOT NULL, score double, "
+      "primary key(id));";
+  if ((nRow = db->sendQuery((char *)sql1.c_str())) < 0) {
+    cerr << "DB QUERY ERROR" << endl;
+    return -1;
+  }
+
+  string sql2 = "INSERT INTO score (id, score) VALUES ";
+  for (int i = 0; i < node_vector.size(); i++) {
+    sql2 += "( ";
+    sql2 += IntToString(node_vector.at(i).id) + ", ";
+    sql2 += IntToString(score[i]);
+    sql2 += ")";
+    if (i != node_vector.size() - 1) sql2 += ", ";
+  }
+
+  if ((nRow = db->sendQuery((char *)sql2.c_str())) < 0) {
+    cerr << "DB QUERY ERROR" << endl;
+    return -1;
+  }
 
   return 0;
 }
