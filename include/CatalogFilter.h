@@ -72,3 +72,6 @@ bool diff(double score[], double accum[], int size);
 
 // 計算結果をmysqlに保存する関数
 int Data_save(std::vector<node> node_vector, double score[]);
+
+// DBからデータを取り出す関数
+int Data_get(std::vector<node> node_vector, double score[]);

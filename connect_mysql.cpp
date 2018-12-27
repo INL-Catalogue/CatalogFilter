@@ -34,9 +34,24 @@ int main() {
   sql2 += to_string(score);
   sql2 += ");";
 
-  cout << "a" << endl;
+  // cout << "a" << endl;
   if ((nRow = db->sendQuery((char *)sql2.c_str())) < 0) {
     cerr << "DB QUERY ERROR" << endl;
     return -1;
   }
+
+  string sql3 = "SELECT score FROM score ";
+  sql3 += "WHERE id = " + IntToString(1) + ";";
+
+  cout << sql3 << endl;
+  if ((nRow = db->sendQuery((char *)sql3.c_str())) < 0) {
+    cerr << "DB QUERY ERROR" << endl;
+    return -1;
+  }
+  cout << nRow << endl;
+  for (int i = 0; i < nRow; i++) {
+    char **result = db->getResult();
+    double score  = atof(result[0]);
+  }
+  cout << score << endl;
 }
