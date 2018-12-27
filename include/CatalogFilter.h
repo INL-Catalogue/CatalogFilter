@@ -1,8 +1,26 @@
+#ifndef __HEADER_CATSQL_
+#define __HEADER_CATSQL_
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "ReadConfig.h"
+
+#include "DBClient.h"
+#include "TcpClient.h"
+#include "TcpMessenger.h"
+#include "TcpServer.h"
+#include "common.h"
+
+#define dbHost "127.0.0.1"
+#define dbUser "root"
+#define dbps "root"
+#define dbName "catalog_filter"
+
+#endif
 
 using namespace std;
 
@@ -51,3 +69,6 @@ void accum_score(double accum[], double score[], int size);
 
 // scoreとaccumの差分判定を行う関数
 bool diff(double score[], double accum[], int size);
+
+// 計算結果をmysqlに保存する関数
+int Data_save(std::vector<node> node_vector, double score[]);
