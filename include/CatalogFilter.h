@@ -56,13 +56,13 @@ int neighbor_check(int a, struct node node);
 void print_score(std::vector<node> node_vector, double score[], double accum[]);
 
 // edge行列を生成
-void generate_edge(std::vector<node> node_vector, double *edge);
+void generate_edge(std::vector<node> node_vector, double **edge);
 
 // edge行列を出力する関数
-void print_edge(std::vector<node> node_vector, double *edge);
+void print_edge(std::vector<node> node_vector, double **edge);
 
 // score[] * edge[][] = accum[]を実行する関数
-void Simplified_PageRank(double score[], double *edge, double accum[],
+void Simplified_PageRank(double score[], double **edge, double accum[],
                          int size);
 // accumのデータをscoreに代入してaccumを初期化(全要素0に)する関数
 void accum_score(double accum[], double score[], int size);
