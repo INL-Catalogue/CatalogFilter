@@ -100,15 +100,19 @@ int main() {
   //  edge行列の生成  //
   ////////////////////
 
-  double edge[node_vector.size()][node_vector.size()];
+  double **edge = new double *[node_vector.size()];
+  for (int i = 0; i < node_vector.size(); i++)
+    edge[i] = new double[node_vector.size()];
+
+  // double edge[node_vector.size()][node_vector.size()];
   for (int i = 0; i < node_vector.size(); i++) {
     for (int j = 0; j < node_vector.size(); j++) {
       edge[i][j] = 0;
     }
   }
 
-  generate_edge(node_vector, &edge[0][0]);
-  print_edge(node_vector, &edge[0][0]);
+  generate_edge(node_vector, edge);
+  print_edge(node_vector, edge);
 
   ///////////////
   //  初期計算  //
@@ -118,7 +122,7 @@ int main() {
 
   while (1) {
     cout << "count " << count << endl;
-    Simplified_PageRank(score, &edge[0][0], accum, node_vector.size());
+    Simplified_PageRank(score, edge, accum, node_vector.size());
     print_score(node_vector, score, accum);
     if (diff(score, accum, node_vector.size())) {
       accum_score(accum, score, node_vector.size());
@@ -128,7 +132,7 @@ int main() {
     count++;
     cout << endl;
   }
-
+  cout << "count " << count << endl;
   ///////////////
   //  DBへ保存  //
   ///////////////
@@ -211,32 +215,35 @@ void print_score(std::vector<node> node_vector, double score[],
   }
 }
 
-void generate_edge(std::vector<node> node_vector, double *edge) {
+void generate_edge(std::vector<node> node_vector, double **edge) {
   for (int i = 0; i < node_vector.size(); i++) {
     double element = 1.0 / (double)node_vector.at(i).neighbor.size();
     for (int j = 0; j < node_vector.size(); j++) {
       int k = neighbor_check(node_vector.at(j).id, node_vector.at(i));
-      if (k != -1) *(edge + i * node_vector.size() + j) = element;
+      if (k != -1) edge[i][j] = element;
+      //*(edge + i * node_vector.size() + j) = element;
     }
   }
 }
 
-void print_edge(std::vector<node> node_vector, double *edge) {
+void print_edge(std::vector<node> node_vector, double **edge) {
   for (int i = 0; i < node_vector.size(); i++) {
     cout << "| " << node_vector.at(i).id << " |";
     for (int j = 0; j < node_vector.size(); j++) {
-      cout << " " << *(edge + i * node_vector.size() + j) << " ";
+      cout << " " << edge[i][j] << " ";
+      // cout << " " << *(edge + i * node_vector.size() + j) << " ";
     }
     cout << endl;
   }
   cout << endl;
 }
 
-void Simplified_PageRank(double score[], double *edge, double accum[],
+void Simplified_PageRank(double score[], double **edge, double accum[],
                          int size) {
   for (int i = 0; i < size; i++) {
     for (int j = 0; j < size; j++) {
-      double e = *(edge + j * size + i);
+      double e = edge[j][i];
+      // double e = *(edge + j * size + i);
       accum[i] = accum[i] + score[j] * e;
     }
   }
@@ -280,7 +287,7 @@ int Data_save(std::vector<node> node_vector, double score[]) {
   for (int i = 0; i < node_vector.size(); i++) {
     sql2 += "( ";
     sql2 += IntToString(node_vector.at(i).id) + ", ";
-    sql2 += IntToString(score[i]);
+    sql2 += std::to_string(score[i]);
     sql2 += ")";
     if (i != node_vector.size() - 1) sql2 += ", ";
   }
