@@ -15,6 +15,10 @@ int main() {
   //  csvファイルの読み込み  //
   //////////////////////////
 
+  clock_t start, end;
+  double  exe_time = 0.0;
+  start            = clock();
+
   std::ifstream ifs("data.csv");
   ifs.is_open();
 
@@ -78,6 +82,11 @@ int main() {
   }
   ifs.close();
 
+  end            = clock();
+  double io_time = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+  exe_time += io_time;
+  start = clock();
+
   //////////////////////
   //  スコア配列の生成  //
   /////////////////////
@@ -94,12 +103,17 @@ int main() {
   ///////////////////////////
 
   Data_get(node_vector, score);
-  print_score(node_vector, score, accum);
+  end            = clock();
+  double db_time = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+  exe_time += db_time;
+  start = clock();
+  // print_score(node_vector, score, accum);
 
   /////////////////////
   //  edge行列の生成  //
   ////////////////////
 
+  /*
   double edge[node_vector.size()][node_vector.size()];
   for (int i = 0; i < node_vector.size(); i++) {
     for (int j = 0; j < node_vector.size(); j++) {
@@ -109,12 +123,18 @@ int main() {
 
   generate_edge(node_vector, &edge[0][0]);
 
+  */
+
   //////////////////////////////
   //  エッジの重みによる計算処理  //
   //////////////////////////////
 
   int id;
   int index;
+
+  end = clock();
+  exe_time += (double)(end - start) / CLOCKS_PER_SEC * 1000;
+
   while (1) {
     cin >> id;
     if ((index = node_check(id, node_vector)) > 0)
@@ -122,6 +142,8 @@ int main() {
     else
       cout << "Please input exist ID" << endl;
   }
+
+  start = clock();
 
   double ac    = score[index] * (-1);
   score[index] = ac;
@@ -138,10 +160,18 @@ int main() {
     score[id] += score[index] * (-1) * (weight[i] / sum);
   }
 
-  cout << endl;
+  // cout << endl;
   cout << "result" << endl;
   score[index] = ac;
   print_score(node_vector, score, accum);
+
+  end = clock();
+  exe_time += (double)(end - start) / CLOCKS_PER_SEC * 1000;
+
+  cout << "I/O time: " << io_time << "(msec)" << endl;
+  cout << "DB time: " << db_time << "(msec)" << endl;
+  cout << "Comoute time: " << exe_time - io_time - db_time << "(ms)" << endl;
+  cout << "Total time: " << exe_time << "(ms)" << endl;
 
   return 0;
 }
