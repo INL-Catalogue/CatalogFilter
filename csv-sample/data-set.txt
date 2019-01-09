@@ -1,0 +1,61 @@
+<node100.csv>
+node: 95    edge: 647   catalog: 50
+
+<node500.csv>
+node: 471   edge: 3332  catalog: 250
+
+<node1000.csv>
+node: 951   edge: 6503  catalog: 500
+
+<node1500.csv>
+node: 1424  edge: 11033 catalog: 750
+
+<node2000.csv>
+node: 1869  edge: 13583 catalog: 1000
+
+<node3000.csv>
+node: 2829  edge: 21230 catalog: 1500
+
+<node4000.csv>
+node: 3768  edge: 27502 catalog: 2000
+
+<node5000.csv>
+node: 4677  edge: 34112 catalog: 2500
+
+
+
+<catalog100.csv>
+node: 423   edge: 1308  catalog: 100
+
+<catalog200.csv>
+node: 658   edge: 2772  catalog: 200
+
+<catalog300.csv>
+node: 811   edge: 4112  catalog: 300
+
+<catalog400.csv>
+node: 885   edge: 5429  catalog: 400
+
+<catalog500.csv>
+node: 951   edge: 6503  catalog: 500
+
+<catalog600.csv>
+node: 970   edge: 7785  catalog: 600
+
+<catalog700.csv>
+node: 984   edge: 9124  catalog: 700
+
+<catalog800.csv>
+node: 993   edge: 10277 catalog: 800
+
+<catalog900.csv>
+node: 994   edge: 12724 catalog: 900
+
+<catalog1000.csv>
+node: 997   edge: 13461 catalog: 1000
+
+<catalog1100.csv>
+node: 998   edge: 14200 catalog: 1100
+
+<catalog1200.csv>
+node: 1000  edge: 15949 catalog: 1200
