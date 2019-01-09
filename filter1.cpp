@@ -15,6 +15,10 @@ int main() {
   //  csvファイルの読み込み  //
   //////////////////////////
 
+  clock_t start, end;
+  double  exe_time = 0.0;
+  start            = clock();
+
   std::ifstream ifs("data.csv");
   ifs.is_open();
 
@@ -78,6 +82,11 @@ int main() {
   }
   ifs.close();
 
+  end            = clock();
+  double io_time = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+  exe_time += io_time;
+  start = clock();
+
   //////////////////////
   //  スコア配列の生成  //
   /////////////////////
@@ -94,20 +103,28 @@ int main() {
   ///////////////////////////
 
   Data_get(node_vector, score);
-  print_score(node_vector, score, accum);
+  // print_score(node_vector, score, accum);
+  end            = clock();
+  double db_time = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+  exe_time += db_time;
+  start = clock();
 
   /////////////////////
   //  edge行列の生成  //
   ////////////////////
 
-  double edge[node_vector.size()][node_vector.size()];
+  double **edge = new double *[node_vector.size()];
+  for (int i = 0; i < node_vector.size(); i++)
+    edge[i] = new double[node_vector.size()];
+
+  // double edge[node_vector.size()][node_vector.size()];
   for (int i = 0; i < node_vector.size(); i++) {
     for (int j = 0; j < node_vector.size(); j++) {
       edge[i][j] = 0;
     }
   }
 
-  generate_edge(node_vector, &edge[0][0]);
+  generate_edge(node_vector, edge);
 
   ///////////////////////////////////
   //  Simplified PageRank 計算処理  //
@@ -115,13 +132,19 @@ int main() {
 
   int id;
   int index;
+
+  end = clock();
+  exe_time += (double)(end - start) / CLOCKS_PER_SEC * 1000;
+
   while (1) {
-    cin　>> id;
+    cin >> id;
     if ((index = node_check(id, node_vector)) > 0)
       break;
     else
       cout << "Please input exist ID" << endl;
   }
+
+  start = clock();
 
   double ac;
   ac           = score[index] * (-1);
@@ -130,22 +153,30 @@ int main() {
   int count = 1;
 
   while (1) {
-    cout << "count " << count << endl;
-    Simplified_PageRank(score, &edge[0][0], accum, node_vector.size());
+    // cout << "count " << count << endl;
+    Simplified_PageRank(score, edge, accum, node_vector.size());
     // accum[index] = ac;
-    print_score(node_vector, score, accum);
+    // print_score(node_vector, score, accum);
     if (diff(score, accum, node_vector.size())) {
       accum_score(accum, score, node_vector.size());
       break;
     }
     accum_score(accum, score, node_vector.size());
     count++;
-    cout << endl;
+    // cout << endl;
   }
-  cout << endl;
+  cout << "count: " << count << endl;
   cout << "result" << endl;
   score[index] = ac;
   print_score(node_vector, score, accum);
+
+  end = clock();
+  exe_time += (double)(end - start) / CLOCKS_PER_SEC * 1000;
+
+  cout << "I/O time: " << io_time << "(msec)" << endl;
+  cout << "DB time: " << db_time << "(msec)" << endl;
+  cout << "Comoute time: " << exe_time - io_time - db_time << "(ms)" << endl;
+  cout << "Total time: " << exe_time << "(ms)" << endl;
 
   return 0;
 }
@@ -223,32 +254,35 @@ void print_score(std::vector<node> node_vector, double score[],
   }
 }
 
-void generate_edge(std::vector<node> node_vector, double *edge) {
+void generate_edge(std::vector<node> node_vector, double **edge) {
   for (int i = 0; i < node_vector.size(); i++) {
     double element = 1.0 / (double)node_vector.at(i).neighbor.size();
     for (int j = 0; j < node_vector.size(); j++) {
       int k = neighbor_check(node_vector.at(j).id, node_vector.at(i));
-      if (k != -1) *(edge + i * node_vector.size() + j) = element;
+      if (k != -1) edge[i][j] = element;
+      //*(edge + i * node_vector.size() + j) = element;
     }
   }
 }
 
-void print_edge(std::vector<node> node_vector, double *edge) {
+void print_edge(std::vector<node> node_vector, double **edge) {
   for (int i = 0; i < node_vector.size(); i++) {
     cout << "| " << node_vector.at(i).id << " |";
     for (int j = 0; j < node_vector.size(); j++) {
-      cout << " " << *(edge + i * node_vector.size() + j) << " ";
+      cout << " " << edge[i][j] << " ";
+      // cout << " " << *(edge + i * node_vector.size() + j) << " ";
     }
     cout << endl;
   }
   cout << endl;
 }
 
-void Simplified_PageRank(double score[], double *edge, double accum[],
+void Simplified_PageRank(double score[], double **edge, double accum[],
                          int size) {
   for (int i = 0; i < size; i++) {
     for (int j = 0; j < size; j++) {
-      double e = *(edge + j * size + i);
+      double e = edge[j][i];
+      // double e = *(edge + j * size + i);
       accum[i] = accum[i] + score[j] * e;
     }
   }
