@@ -15,13 +15,20 @@ int main() {
   //  csvファイルの読み込み  //
   //////////////////////////
 
+  clock_t start, end;
+  double  exe_time = 0.0;
+  start            = clock();
+
   std::ifstream ifs("data.csv");
   ifs.is_open();
 
   std::vector<node> node_vector;
 
+  int row = 0;
+
   std::string line;
   while (std::getline(ifs, line)) {
+    row++;
     vector<int>         a;
     std::vector<string> strvec = split(line, ',');
     for (int i = 0; i < strvec.size(); i++) {
@@ -78,13 +85,29 @@ int main() {
   }
   ifs.close();
 
-  print_vector(node_vector);
-  cout << endl;
+  end            = clock();
+  double io_time = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+  exe_time += io_time;
+
+  ofstream ofs("result.csv");
+
+  ofs << "Prototype1" << endl;
+
+  int edge_num = 0;
+  ofs << "node," << node_vector.size() << endl;
+  for (int i = 0; i < node_vector.size(); i++) {
+    edge_num += node_vector.at(i).neighbor.size();
+    if (i == node_vector.size() - 1) edge_num /= 2;
+  }
+  ofs << "edge," << edge_num << endl;
+  ofs << "catalog," << row << endl;
+  ofs << endl;
 
   //////////////////////
   //  スコア配列の生成  //
   /////////////////////
 
+  start = clock();
   double score[node_vector.size()];
   double accum[node_vector.size()];
 
@@ -92,9 +115,6 @@ int main() {
     score[i] = 100.0;
     accum[i] = 0.0;
   }
-
-  print_score(node_vector, score, accum);
-  cout << endl;
 
   /////////////////////
   //  edge行列の生成  //
@@ -112,7 +132,6 @@ int main() {
   }
 
   generate_edge(node_vector, edge);
-  print_edge(node_vector, edge);
 
   ///////////////
   //  初期計算  //
@@ -121,23 +140,99 @@ int main() {
   int count = 1;
 
   while (1) {
-    cout << "count " << count << endl;
+    // cout << "count " << count << endl;
     Simplified_PageRank(score, edge, accum, node_vector.size());
-    print_score(node_vector, score, accum);
+    // print_score(node_vector, score, accum);
     if (diff(score, accum, node_vector.size())) {
       accum_score(accum, score, node_vector.size());
       break;
     }
     accum_score(accum, score, node_vector.size());
     count++;
-    cout << endl;
+    // cout << endl;
   }
-  cout << "count " << count << endl;
-  ///////////////
-  //  DBへ保存  //
-  ///////////////
 
-  Data_save(node_vector, score);
+  end = clock();
+  exe_time += (double)(end - start) / CLOCKS_PER_SEC * 1000;
+
+  ofs << "id,";
+  for (int i = 0; i < node_vector.size(); i++) {
+    ofs << node_vector.at(i).id;
+    if (i != node_vector.size() - 1)
+      ofs << ",";
+    else
+      ofs << endl;
+  }
+  ofs << "init,";
+  for (int i = 0; i < node_vector.size(); i++) {
+    ofs << score[i];
+    if (i != node_vector.size() - 1)
+      ofs << ",";
+    else
+      ofs << endl;
+  }
+
+  ///////////////////////////////////
+  //  Simplified PageRank 計算処理  //
+  ///////////////////////////////////
+
+  start = clock();
+
+  int id;
+  int index;
+  while (1) {
+    cin >> id;
+    if ((index = node_check(id, node_vector)) > 0)
+      break;
+    else
+      cout << "Please input exist ID" << endl;
+  }
+
+  double ac;
+  ac           = score[index] * (-1);
+  score[index] = ac;
+
+  count = 1;
+
+  while (1) {
+    // cout << "count " << count << endl;
+    Simplified_PageRank(score, edge, accum, node_vector.size());
+    // accum[index] = ac;
+    // print_score(node_vector, score, accum);
+    if (diff(score, accum, node_vector.size())) {
+      accum_score(accum, score, node_vector.size());
+      break;
+    }
+    accum_score(accum, score, node_vector.size());
+    count++;
+    // cout << endl;
+  }
+  score[index] = ac;
+  cout << "count: " << count << endl;
+  cout << "result" << endl;
+  print_score(node_vector, score, accum);
+
+  end = clock();
+  exe_time += (double)(end - start) / CLOCKS_PER_SEC * 1000;
+
+  cout << "io_time: " << io_time << "(ms)" << endl;
+  cout << "compute_time: " << exe_time - io_time << "(ms)" << endl;
+  cout << "total_time: " << exe_time << "(ms)" << endl;
+
+  ofs << "result,";
+  for (int i = 0; i < node_vector.size(); i++) {
+    ofs << score[i];
+    if (i != node_vector.size() - 1)
+      ofs << ",";
+    else
+      ofs << endl;
+  }
+
+  ofs << endl;
+  ofs << "input," << id << endl;
+  ofs << "time(msec)," << exe_time;
+
+  ofs.close();
 
   return 0;
 }
@@ -221,7 +316,7 @@ void generate_edge(std::vector<node> node_vector, double **edge) {
     for (int j = 0; j < node_vector.size(); j++) {
       int k = neighbor_check(node_vector.at(j).id, node_vector.at(i));
       if (k != -1) edge[i][j] = element;
-      //*(edge + i * node_vector.size() + j) = element;
+      // *(edge + i * node_vector.size() + j) = element;
     }
   }
 }
@@ -260,42 +355,4 @@ bool diff(double score[], double accum[], int size) {
   for (int i = 0; i < size; i++)
     if (std::fabs(accum[i] - score[i]) > 0.00001) return false;
   return true;
-}
-
-int Data_save(std::vector<node> node_vector, double score[]) {
-  DBClient *db;
-  db = new DBClient();
-
-  if (db->connectDb((char *)&dbHost[0], (char *)&dbUser[0], (char *)&dbps[0],
-                    (char *)&dbName[0]) < 0) {
-    cerr << "DB CONNECT ERROR" << endl;
-    return -1;
-  } else {
-    cout << "Connect DB" << endl;
-  }
-
-  int    nRow;
-  string sql1 =
-      "CREATE TABLE IF NOT EXISTS score (id int NOT NULL, score double, "
-      "primary key(id));";
-  if ((nRow = db->sendQuery((char *)sql1.c_str())) < 0) {
-    cerr << "DB QUERY ERROR" << endl;
-    return -1;
-  }
-
-  string sql2 = "INSERT INTO score (id, score) VALUES ";
-  for (int i = 0; i < node_vector.size(); i++) {
-    sql2 += "( ";
-    sql2 += IntToString(node_vector.at(i).id) + ", ";
-    sql2 += std::to_string(score[i]);
-    sql2 += ")";
-    if (i != node_vector.size() - 1) sql2 += ", ";
-  }
-
-  if ((nRow = db->sendQuery((char *)sql2.c_str())) < 0) {
-    cerr << "DB QUERY ERROR" << endl;
-    return -1;
-  }
-
-  return 0;
 }

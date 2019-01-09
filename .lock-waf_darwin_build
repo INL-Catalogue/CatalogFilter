@@ -1,0 +1,8 @@
+argv = ['./waf', 'configure']
+environ = {'CPPFLAGS': '-I/usr/local/opt/mysql@5.7/include', 'TERM_SESSION_ID': 'CE61ADAC-88D4-42DB-8B26-BABDFCFEB053', 'XPC_SERVICE_NAME': '0', 'VERSIONER_PYTHON_PREFER_32_BIT': 'no', 'TERM_PROGRAM_VERSION': '421.1', 'SSH_AUTH_SOCK': '/private/tmp/com.apple.launchd.ZOnHgQ7THV/Listeners', 'Apple_PubSub_Socket_Render': '/private/tmp/com.apple.launchd.1ujyesQspi/Render', 'LOGNAME': 'bass', 'USER': 'bass', 'HOME': '/Users/bass', 'PATH': '/Users/bass/.nodebrew/current/bin:/usr/local/opt/mysql@5.7/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/Users/bass/bin:/Users/bass/bin', 'TMPDIR': '/var/folders/xf/010d0sz95_x68vhj9cs3wvmr0000gn/T/', 'TERM_PROGRAM': 'Apple_Terminal', 'LANG': 'ja_JP.UTF-8', 'TERM': 'vt100', 'SHELL': '/bin/bash', 'VERSIONER_PYTHON_VERSION': '2.7', 'SHLVL': '1', 'OLDPWD': '/Users/bass', 'XPC_FLAGS': '0x0', '__CF_USER_TEXT_ENCODING': '0x1F5:0x1:0xE', 'PWD': '/Users/bass/CatalogFilter', '_': './waf', 'LDFLAGS': '-L/usr/local/opt/mysql@5.7/lib'}
+files = ['/Users/bass/CatalogFilter/wscript']
+hash = '\x1d\xca\x8a\xf3\x07\x903\xb7q\xe6\x9f\xa3\x165\xca\xb0'
+options = {'files': '', 'jobs': 4, 'verbose': 0, 'progress_bar': 0, 'distcheck_args': None, 'top': '', 'libdir': None, 'colors': 'auto', 'destdir': '', 'keep': 0, 'zones': '', 'prefix': '/usr/local/', 'force': False, 'check_cxx_compiler': None, 'targets': '', 'bindir': None, 'out': ''}
+out_dir = '/Users/bass/CatalogFilter/build'
+run_dir = '/Users/bass/CatalogFilter'
+top_dir = '/Users/bass/CatalogFilter'

@@ -15,6 +15,10 @@ int main() {
   //  csvファイルの読み込み  //
   //////////////////////////
 
+  clock_t start, end;
+  double  exe_time = 0.0;
+  start            = clock();
+
   std::ifstream ifs("data.csv");
   ifs.is_open();
 
@@ -78,8 +82,10 @@ int main() {
   }
   ifs.close();
 
-  print_vector(node_vector);
-  cout << endl;
+  end            = clock();
+  double io_time = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+  exe_time += io_time;
+  start = clock();
 
   //////////////////////
   //  スコア配列の生成  //
@@ -89,12 +95,19 @@ int main() {
   double accum[node_vector.size()];
 
   for (int i = 0; i < node_vector.size(); i++) {
-    score[i] = 100.0;
     accum[i] = 0.0;
   }
 
-  print_score(node_vector, score, accum);
-  cout << endl;
+  ///////////////////////////
+  //  DBからデータを取り出す  //
+  ///////////////////////////
+
+  Data_get(node_vector, score);
+  // print_score(node_vector, score, accum);
+  end            = clock();
+  double db_time = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+  exe_time += db_time;
+  start = clock();
 
   /////////////////////
   //  edge行列の生成  //
@@ -112,32 +125,58 @@ int main() {
   }
 
   generate_edge(node_vector, edge);
-  print_edge(node_vector, edge);
 
-  ///////////////
-  //  初期計算  //
-  ///////////////
+  ///////////////////////////////////
+  //  Simplified PageRank 計算処理  //
+  ///////////////////////////////////
+
+  int id;
+  int index;
+
+  end = clock();
+  exe_time += (double)(end - start) / CLOCKS_PER_SEC * 1000;
+
+  while (1) {
+    cin >> id;
+    if ((index = node_check(id, node_vector)) > 0)
+      break;
+    else
+      cout << "Please input exist ID" << endl;
+  }
+
+  start = clock();
+
+  double ac;
+  ac           = score[index] * (-1);
+  score[index] = ac;
 
   int count = 1;
 
   while (1) {
-    cout << "count " << count << endl;
+    // cout << "count " << count << endl;
     Simplified_PageRank(score, edge, accum, node_vector.size());
-    print_score(node_vector, score, accum);
+    // accum[index] = ac;
+    // print_score(node_vector, score, accum);
     if (diff(score, accum, node_vector.size())) {
       accum_score(accum, score, node_vector.size());
       break;
     }
     accum_score(accum, score, node_vector.size());
     count++;
-    cout << endl;
+    // cout << endl;
   }
-  cout << "count " << count << endl;
-  ///////////////
-  //  DBへ保存  //
-  ///////////////
+  cout << "count: " << count << endl;
+  cout << "result" << endl;
+  score[index] = ac;
+  print_score(node_vector, score, accum);
 
-  Data_save(node_vector, score);
+  end = clock();
+  exe_time += (double)(end - start) / CLOCKS_PER_SEC * 1000;
+
+  cout << "I/O time: " << io_time << "(msec)" << endl;
+  cout << "DB time: " << db_time << "(msec)" << endl;
+  cout << "Comoute time: " << exe_time - io_time - db_time << "(ms)" << endl;
+  cout << "Total time: " << exe_time << "(ms)" << endl;
 
   return 0;
 }
@@ -262,7 +301,7 @@ bool diff(double score[], double accum[], int size) {
   return true;
 }
 
-int Data_save(std::vector<node> node_vector, double score[]) {
+int Data_get(std::vector<node> node_vector, double score[]) {
   DBClient *db;
   db = new DBClient();
 
@@ -275,26 +314,18 @@ int Data_save(std::vector<node> node_vector, double score[]) {
   }
 
   int    nRow;
-  string sql1 =
-      "CREATE TABLE IF NOT EXISTS score (id int NOT NULL, score double, "
-      "primary key(id));";
+  string sql1 = "SELECT * FROM score;";
   if ((nRow = db->sendQuery((char *)sql1.c_str())) < 0) {
     cerr << "DB QUERY ERROR" << endl;
     return -1;
   }
 
-  string sql2 = "INSERT INTO score (id, score) VALUES ";
-  for (int i = 0; i < node_vector.size(); i++) {
-    sql2 += "( ";
-    sql2 += IntToString(node_vector.at(i).id) + ", ";
-    sql2 += std::to_string(score[i]);
-    sql2 += ")";
-    if (i != node_vector.size() - 1) sql2 += ", ";
-  }
-
-  if ((nRow = db->sendQuery((char *)sql2.c_str())) < 0) {
-    cerr << "DB QUERY ERROR" << endl;
-    return -1;
+  for (int i = 0; i < nRow; i++) {
+    char **result = db->getResult();
+    int    id     = atoi(result[0]);
+    double score1 = atof(result[1]);
+    int    index  = node_check(id, node_vector);
+    score[index]  = score1;
   }
 
   return 0;
