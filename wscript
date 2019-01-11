@@ -20,9 +20,9 @@ def configure(ctx):
 def build(bld):
 	bld.recurse('Catlib')
 	bld.program(
-			source = ['./connect_mysql.cpp'],
+			source = ['./sample/connect_mysql.cpp'],
 			target = 'Connect_mysql',
-			includes = ['./catlib/include', './catlib/include/catlib', './mysql_config.hpp'],
+			includes = ['./catlib/include', './catlib/include/catlib', './sample/mysql_config.hpp'],
 			defines  = defines,
 			cxxflags = ['-O3', '-g', '-Wall', '-std=c++11'],
 			#lib      = ['m', 'pthread', 'rt'],
