@@ -21,7 +21,7 @@ struct node {
 
 int check(int id, vector<int> data);
 int node_check(int id, vector<node> node_vector);
-int neighbor_check(int a, struct node node);
+int neighbor_check(int a, struct node n);
 
 int main() {
   int row;       // カタログ数
@@ -68,15 +68,15 @@ int main() {
           j--;
       }
       ofs << endl;
-      for (int i = 0; i < data.size(); i++) {
-        if (node_vector.size() != 0) {
+      for (int i = 0; i < (int)data.size(); i++) {
+        if ((int)node_vector.size() != 0) {
           // 2番目以降の要素の追加
           if (node_check(data.at(i), node_vector) == -1) {
             // 新出のノードの場合
             struct node n;
             n.id = data.at(i);
             struct neighbor ng;
-            for (int j = 0; j < data.size(); j++) {
+            for (int j = 0; j < (int)data.size(); j++) {
               if (j != i) {
                 ng.id     = data.at(j);
                 ng.weight = 1;
@@ -87,7 +87,7 @@ int main() {
           } else {
             // 既存のノードの場合
             int j = node_check(data.at(i), node_vector);
-            for (int k = 0; k < data.size(); k++) {
+            for (int k = 0; k < (int)data.size(); k++) {
               if (k != i) {
                 int l = neighbor_check(data.at(k), node_vector.at(j));
                 if (l == -1) {
@@ -103,12 +103,12 @@ int main() {
               }
             }
           }
-        } else if (node_vector.size() == 0) {
+        } else if ((int)node_vector.size() == 0) {
           // 1番最初の要素の追加
           struct node n;
           n.id = data.at(0);
           node_vector.push_back(n);
-          for (int i = 1; i < data.size(); i++) {
+          for (int i = 1; i < (int)data.size(); i++) {
             struct neighbor ng;
             ng.id     = data.at(i);
             ng.weight = 1;
@@ -122,12 +122,12 @@ int main() {
 
   ofs.close();
 
-  for (int i = 0; i < node_vector.size(); i++) {
-    edge_num += node_vector.at(i).neighbor.size();
-    if (i == node_vector.size() - 1) edge_num /= 2;
+  for (int i = 0; i < (int)node_vector.size(); i++) {
+    edge_num += (int)node_vector.at(i).neighbor.size();
+    if (i == (int)node_vector.size() - 1) edge_num /= 2;
   }
 
-  cout << "node: " << node_vector.size() << endl;
+  cout << "node: " << (int)node_vector.size() << endl;
   cout << "edge: " << edge_num << endl;
   cout << "catalog: " << row << endl;
 
@@ -135,22 +135,22 @@ int main() {
 }
 
 int check(int id, vector<int> data) {
-  for (int i = 0; i < data.size(); i++) {
+  for (int i = 0; i < (int)data.size(); i++) {
     if (id == data.at(i)) return 0;
   }
   return 1;
 }
 
 int node_check(int a, std::vector<node> node_vector) {
-  for (int i = 0; i < node_vector.size(); i++) {
+  for (int i = 0; i < (int)node_vector.size(); i++) {
     if (a == node_vector.at(i).id) return i;
   }
   return -1;
 }
 
-int neighbor_check(int a, struct node node) {
-  for (int i = 0; i < node.neighbor.size(); i++) {
-    if (a == node.neighbor.at(i).id) return i;
+int neighbor_check(int a, struct node n) {
+  for (int i = 0; i < (int)n.neighbor.size(); i++) {
+    if (a == n.neighbor.at(i).id) return i;
   }
   return -1;
 }

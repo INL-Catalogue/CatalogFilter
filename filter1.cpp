@@ -28,18 +28,18 @@ int main() {
   while (std::getline(ifs, line)) {
     vector<int>         a;
     std::vector<string> strvec = split(line, ',');
-    for (int i = 0; i < strvec.size(); i++) {
+    for (int i = 0; i < (int)strvec.size(); i++) {
       a.push_back(std::stoi(strvec.at(i)));
     }
-    for (int i = 0; i < a.size(); i++) {
-      if (node_vector.size() != 0) {
+    for (int i = 0; i < (int)a.size(); i++) {
+      if ((int)node_vector.size() != 0) {
         // 2番目以降の要素の追加
         if (node_check(a.at(i), node_vector) == -1) {
           // 新出のノードの場合
           struct node n;
           n.id = a.at(i);
           struct neighbor ng;
-          for (int j = 0; j < a.size(); j++) {
+          for (int j = 0; j < (int)a.size(); j++) {
             if (j != i) {
               ng.id     = a.at(j);
               ng.weight = 1;
@@ -50,7 +50,7 @@ int main() {
         } else {
           // 既存のノードの場合
           int j = node_check(a.at(i), node_vector);
-          for (int k = 0; k < a.size(); k++) {
+          for (int k = 0; k < (int)a.size(); k++) {
             if (k != i) {
               int l = neighbor_check(a.at(k), node_vector.at(j));
               if (l == -1) {
@@ -66,12 +66,12 @@ int main() {
             }
           }
         }
-      } else if (node_vector.size() == 0) {
+      } else if ((int)node_vector.size() == 0) {
         // 1番最初の要素の追加
         struct node n;
         n.id = a.at(0);
         node_vector.push_back(n);
-        for (int i = 1; i < a.size(); i++) {
+        for (int i = 1; i < (int)a.size(); i++) {
           struct neighbor ng;
           ng.id     = a.at(i);
           ng.weight = 1;
@@ -91,10 +91,10 @@ int main() {
   //  スコア配列の生成  //
   /////////////////////
 
-  double score[node_vector.size()];
-  double accum[node_vector.size()];
+  double score[(int)node_vector.size()];
+  double accum[(int)node_vector.size()];
 
-  for (int i = 0; i < node_vector.size(); i++) {
+  for (int i = 0; i < (int)node_vector.size(); i++) {
     accum[i] = 0.0;
   }
 
@@ -113,13 +113,13 @@ int main() {
   //  edge行列の生成  //
   ////////////////////
 
-  double **edge = new double *[node_vector.size()];
-  for (int i = 0; i < node_vector.size(); i++)
-    edge[i] = new double[node_vector.size()];
+  double **edge = new double *[(int)node_vector.size()];
+  for (int i = 0; i < (int)node_vector.size(); i++)
+    edge[i] = new double[(int)node_vector.size()];
 
-  // double edge[node_vector.size()][node_vector.size()];
-  for (int i = 0; i < node_vector.size(); i++) {
-    for (int j = 0; j < node_vector.size(); j++) {
+  // double edge[(int)node_vector.size()][(int)node_vector.size()];
+  for (int i = 0; i < (int)node_vector.size(); i++) {
+    for (int j = 0; j < (int)node_vector.size(); j++) {
       edge[i][j] = 0;
     }
   }
@@ -154,14 +154,14 @@ int main() {
 
   while (1) {
     // cout << "count " << count << endl;
-    Simplified_PageRank(score, edge, accum, node_vector.size());
+    Simplified_PageRank(score, edge, accum, (int)node_vector.size());
     // accum[index] = ac;
     // print_score(node_vector, score, accum);
-    if (diff(score, accum, node_vector.size())) {
-      accum_score(accum, score, node_vector.size());
+    if (diff(score, accum, (int)node_vector.size())) {
+      accum_score(accum, score, (int)node_vector.size());
       break;
     }
-    accum_score(accum, score, node_vector.size());
+    accum_score(accum, score, (int)node_vector.size());
     count++;
     // cout << endl;
   }
@@ -191,40 +191,40 @@ std::vector<string> split(std::string &input, char delimiter) {
   return result;
 }
 
-void print(struct node node) {
-  std::cout << "id = " << node.id << endl;
+void print(struct node n) {
+  std::cout << "id = " << n.id << endl;
   std::cout << "neighbor: ";
-  for (int i = 0; i < node.neighbor.size(); i++) {
-    if (i == node.neighbor.size() - 1)
-      std::cout << node.neighbor.at(i).id << endl;
+  for (int i = 0; i < (int)n.neighbor.size(); i++) {
+    if (i == (int)n.neighbor.size() - 1)
+      std::cout << n.neighbor.at(i).id << endl;
     else
-      std::cout << node.neighbor.at(i).id << ", ";
+      std::cout << n.neighbor.at(i).id << ", ";
   }
   std::cout << "weight:   ";
-  for (int i = 0; i < node.neighbor.size(); i++) {
-    if (i == node.neighbor.size() - 1)
-      std::cout << node.neighbor.at(i).weight << endl;
+  for (int i = 0; i < (int)n.neighbor.size(); i++) {
+    if (i == (int)n.neighbor.size() - 1)
+      std::cout << n.neighbor.at(i).weight << endl;
     else
-      std::cout << node.neighbor.at(i).weight << ", ";
+      std::cout << n.neighbor.at(i).weight << ", ";
   }
 }
 
 void print_vector(std::vector<node> node_vector) {
-  for (int j = 0; j < node_vector.size(); j++) {
+  for (int j = 0; j < (int)node_vector.size(); j++) {
     print(node_vector.at(j));
   }
 }
 
 int node_check(int a, std::vector<node> node_vector) {
-  for (int i = 0; i < node_vector.size(); i++) {
+  for (int i = 0; i < (int)node_vector.size(); i++) {
     if (a == node_vector.at(i).id) return i;
   }
   return -1;
 }
 
-int neighbor_check(int a, struct node node) {
-  for (int i = 0; i < node.neighbor.size(); i++) {
-    if (a == node.neighbor.at(i).id) return i;
+int neighbor_check(int a, struct node n) {
+  for (int i = 0; i < (int)n.neighbor.size(); i++) {
+    if (a == n.neighbor.at(i).id) return i;
   }
   return -1;
 }
@@ -232,22 +232,22 @@ int neighbor_check(int a, struct node node) {
 void print_score(std::vector<node> node_vector, double score[],
                  double accum[]) {
   cout << "  id  |";
-  for (int i = 0; i < node_vector.size(); i++) {
-    if (i == node_vector.size() - 1)
+  for (int i = 0; i < (int)node_vector.size(); i++) {
+    if (i == (int)node_vector.size() - 1)
       cout << "  " << node_vector.at(i).id << "  |" << endl;
     else
       cout << "  " << node_vector.at(i).id << "  |";
   }
   cout << "score |";
-  for (int i = 0; i < node_vector.size(); i++) {
-    if (i == node_vector.size() - 1)
+  for (int i = 0; i < (int)node_vector.size(); i++) {
+    if (i == (int)node_vector.size() - 1)
       cout << " " << score[i] << " |" << endl;
     else
       cout << " " << score[i] << " |";
   }
   cout << "accum |";
-  for (int i = 0; i < node_vector.size(); i++) {
-    if (i == node_vector.size() - 1)
+  for (int i = 0; i < (int)node_vector.size(); i++) {
+    if (i == (int)node_vector.size() - 1)
       cout << " " << accum[i] << " |" << endl;
     else
       cout << " " << accum[i] << " |";
@@ -255,22 +255,22 @@ void print_score(std::vector<node> node_vector, double score[],
 }
 
 void generate_edge(std::vector<node> node_vector, double **edge) {
-  for (int i = 0; i < node_vector.size(); i++) {
+  for (int i = 0; i < (int)node_vector.size(); i++) {
     double element = 1.0 / (double)node_vector.at(i).neighbor.size();
-    for (int j = 0; j < node_vector.size(); j++) {
+    for (int j = 0; j < (int)node_vector.size(); j++) {
       int k = neighbor_check(node_vector.at(j).id, node_vector.at(i));
       if (k != -1) edge[i][j] = element;
-      //*(edge + i * node_vector.size() + j) = element;
+      //*(edge + i * (int)node_vector.size() + j) = element;
     }
   }
 }
 
 void print_edge(std::vector<node> node_vector, double **edge) {
-  for (int i = 0; i < node_vector.size(); i++) {
+  for (int i = 0; i < (int)node_vector.size(); i++) {
     cout << "| " << node_vector.at(i).id << " |";
-    for (int j = 0; j < node_vector.size(); j++) {
+    for (int j = 0; j < (int)node_vector.size(); j++) {
       cout << " " << edge[i][j] << " ";
-      // cout << " " << *(edge + i * node_vector.size() + j) << " ";
+      // cout << " " << *(edge + i * (int)node_vector.size() + j) << " ";
     }
     cout << endl;
   }
